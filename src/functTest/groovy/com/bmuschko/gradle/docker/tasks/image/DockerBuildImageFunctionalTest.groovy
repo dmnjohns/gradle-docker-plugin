@@ -75,6 +75,16 @@ class DockerBuildImageFunctionalTest extends AbstractFunctionalTest {
         noExceptionThrown()
     }
 
+    def "can remove intermediate images"() {
+        buildFile << buildImageWithForcerm()
+
+        when:
+        BuildResult result = build("buildImage")
+
+        then:
+        result.output.contains("Removing intermediate container")
+    }
+
     private String buildImageWithShmSize() {
         """
             import com.bmuschko.gradle.docker.tasks.image.Dockerfile
@@ -178,6 +188,25 @@ class DockerBuildImageFunctionalTest extends AbstractFunctionalTest {
                 dependsOn dockerfile
                 inputDir = file("build/docker")
                 tag = 'test/image:123'
+            }
+        """
+    }
+
+    private String buildImageWithForcerm() {
+        """
+            import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+            import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+            task dockerfile(type: Dockerfile) {
+                from '$TEST_IMAGE_WITH_TAG'
+                label(['foo': 'bar'])
+                copyFile('fake-src', '/tmp/fake-dest')
+            }
+
+            task buildImage(type: DockerBuildImage) {
+                dependsOn dockerfile
+                inputDir = file("build/docker")
+                forcerm = true
             }
         """
     }

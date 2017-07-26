@@ -62,6 +62,10 @@ class DockerBuildImage extends AbstractDockerRemoteApiTask implements RegistryCr
 
     @Input
     @Optional
+    Boolean forcerm
+
+    @Input
+    @Optional
     Boolean quiet
 
     @Input
@@ -128,6 +132,10 @@ class DockerBuildImage extends AbstractDockerRemoteApiTask implements RegistryCr
 
         if (getRemove()) {
             buildImageCmd.withRemove(getRemove())
+        }
+
+        if (getForcerm()) {
+            buildImageCmd.withForcerm(getForcerm())
         }
 
         if (getQuiet()) {
